@@ -11,18 +11,13 @@
 }
 
 body {
-  background-color: #89aed3; /* light background */
-  background-image: url('/images/bg.jpg'); /* optional image */
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  margin: 0;
+  background-color: #89aed3;
+  width: 100%;
+  
 }
 #app{
-    background-color: rgb(170, 244, 247);
+    background-color: rgb(201, 230, 226);
     width: 100%;
     min-height: 100vh;
-   display: flex;
-  flex-direction: column;
-  margin: 0;
-}
+    margin: 0;
+} 

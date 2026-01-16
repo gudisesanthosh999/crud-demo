@@ -1,50 +1,39 @@
 <template>
-  <!-- HEADER -->
+
   <div class="heading">
     <h1>Records</h1>
+    <button class=" Logoutbtn btn btn-danger mb-3" @click="logout">Logout</button>
   </div>
 
-  <!-- MAIN WRAPPER -->
+
   <div class="main-wrapper">
 
-    <!-- LEFT STATUS TABS -->
+
     <aside class="status-panel">
-      <div
-        class="status-tab"
-        :class="{ active: filter === '' }"
-        @click="setStatus('')"
-      >
+      <div class="status-tab" :class="{ active: filter === '' }" @click="setStatus('')">
         All
       </div>
 
-      <div
-        class="status-tab"
-        :class="{ active: filter === 'active' }"
-        @click="setStatus('active')"
-      >
+      <div class="status-tab" :class="{ active: filter === 'active' }" @click="setStatus('active')" >
         Active
       </div>
 
-      <div
-        class="status-tab"
-        :class="{ active: filter === 'inactive' }"
-        @click="setStatus('inactive')"
-      >
+      <div class="status-tab" :class="{ active: filter === 'inactive' }" @click="setStatus('inactive')" >
         Inactive
       </div>
     </aside>
 
-    <!-- RIGHT RECORDS SECTION -->
+
     <section class="records-section position-relative">
 
-      <!-- CREATE BUTTON -->
+
       <div class="d-flex justify-content-end mb-3">
         <button class="btn btn-success" @click="create">
           <i class="bi bi-plus-circle"></i> Create Record
         </button>
       </div>
 
-      <!-- TABLE -->
+
       <table class="table table-bordered">
         <thead class="text-center">
           <tr>
@@ -80,16 +69,9 @@
         </tbody>
       </table>
 
-      <!-- FLOATING FORM -->
-      <div
-        v-if="showForm"
-        class="floating-form card shadow"
-        :style="{ top: position.y + 'px', left: position.x + 'px' }"
-      >
-        <div
-          class="card-header d-flex justify-content-between cursor-move"
-          @mousedown="startDrag"
-        >
+
+      <div v-if="showForm" class="floating-form card shadow" :style="{ top: position.y + 'px', left: position.x + 'px' }" >
+        <div class="card-header d-flex justify-content-between cursor-move" @mousedown="startDrag" >
         <strong>
           <i class="bi" :class="{
             'bi-plus-circle text-success': mode === 'create',
@@ -98,10 +80,10 @@
           }"></i>
           {{
             mode === 'create'
-              ? 'Create Item'
+              ? 'Create Record'
               : mode === 'edit'
-                ? 'Edit Item'
-                : 'Delete Item'
+                ? 'Edit Record'
+                : 'Delete Record'
           }}
         </strong>
           
@@ -112,15 +94,16 @@
           <div v-if="mode === 'delete'" class="alert alert-danger">
             Are you sure you want to delete this item?
           </div>
-
+          <label>Name: </label>
           <input v-model="form.name" class="form-control mb-2" :disabled="mode === 'delete'" />
+          <label>Code: </label>
           <input v-model="form.code" class="form-control mb-2" :disabled="mode === 'delete'" />
-
+          <label>Status: </label>
           <select v-model="form.status" class="form-select mb-2" :disabled="mode === 'delete'">
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
-
+          <label>Description: </label>
           <textarea v-model="form.description" class="form-control mb-3" :disabled="mode === 'delete'"></textarea>
 
           <div class="d-flex justify-content-between">
@@ -136,6 +119,10 @@
 </template>
 
 <script>
+
+  import axios from 'axios';
+
+
 export default {
   data() {
     return {
@@ -173,13 +160,20 @@ export default {
   },
 
   methods: {
+
+    async logout() {
+      await axios.post('/api/logout');
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    },
+
     setStatus(status) {
       this.filter = status
       this.fetchItems()
     },
 
     fetchItems() {
-      this.$axios
+      axios
         .get('/api/items', { params: { status: this.filter } })
         .then(res => (this.items = res.data))
     },
@@ -209,8 +203,8 @@ export default {
 
     save() {
       const req = this.form.uuid
-        ? this.$axios.put(`/api/items/${this.form.uuid}`, this.form)
-        : this.$axios.post('/api/items', this.form)
+        ? axios.put(`/api/items/${this.form.uuid}`, this.form)
+        : axios.post('/api/items', this.form)
 
       req.then(() => {
         this.fetchItems()
@@ -219,7 +213,7 @@ export default {
     },
 
     deleteItem() {
-      this.$axios.delete(`/api/items/${this.form.uuid}`).then(() => {
+      axios.delete(`/api/items/${this.form.uuid}`).then(() => {
         this.fetchItems()
         this.close()
       })
@@ -255,30 +249,36 @@ export default {
 </script>
 
 <style scoped>
-/* HEADER */
+
 .heading {
+  position: relative;
   height: 80px;
   background: #1e293b;
   color: #ffff;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  
+}
+.Logoutbtn {
+  position: absolute;
+  right: 20px;  
 }
 
-/* MAIN LAYOUT */
+
 .main-wrapper {
   display: flex;
   min-height: calc(100vh - 80px);
 }
 
-/* LEFT STATUS PANEL */
+
 .status-panel {
   width: 150px;
   background-color: #1e293b;
   padding: 15px;
 }
 
-/* STATUS TAB */
+
 .status-tab {
   background-color: #334155;
   color: white;
@@ -294,23 +294,24 @@ export default {
   background-color: #2563eb;
 }
 
-/* RIGHT CONTENT */
+
 .records-section {
   flex: 1;
   padding: 20px;
 }
 
-/* ACTION COLUMN */
+
 .action-cell {
   width: 120px;
   text-align: center;
 }
 
-/* FLOATING FORM */
+
 .floating-form {
   position: absolute;
   width: 500px;
   z-index: 1000;
+  border-radius: 20px;
 }
 
 .cursor-move {
@@ -339,4 +340,15 @@ th,td {
   border: 1 solid;
   background-color: transparent;
 }
+.card-header{
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background-color: rgb(4, 190, 128);
+}
+.card-body{
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  background-color: rgb(181, 247, 225);
+}
+
 </style>
